@@ -2,9 +2,10 @@ use clap::{App, Arg};
 use std::process;
 
 mod gas;
+mod gases;
 mod rk;
 
-use gas::GASES;
+use gases::GASES;
 use rk::RkGas;
 
 fn main() {
@@ -45,7 +46,7 @@ fn main() {
         for g in GASES.iter() {
             let space = 8 - g.id.chars().count();
             assert!(space > 0);
-            let space = iter::repeat(" ").take(space).collect::<String>();
+            let space = " ".repeat(space);
             println!("    {}{}{}", g.id, space, g.name);
         }
         done_something = true;
