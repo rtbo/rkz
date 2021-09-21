@@ -1,5 +1,5 @@
-use roots::{self, Roots};
 use super::gas::PureGas;
+use roots::{self, Roots};
 
 const R: f64 = 6.3145;
 
@@ -26,8 +26,8 @@ pub trait RkGas {
 
         let a3 = 1.0;
         let a2 = -1.0;
-        let a1 = a - b*b - b;
-        let a0 = -a*b;
+        let a1 = a - b * b - b;
+        let a0 = -a * b;
         let roots = roots::find_roots_cubic(a3, a2, a1, a0);
         match roots {
             Roots::No(_) => panic!("could not find Z-factor root"),

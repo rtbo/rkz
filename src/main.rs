@@ -1,5 +1,4 @@
 use clap::{App, Arg};
-use std::iter;
 use std::process;
 
 mod gas;
