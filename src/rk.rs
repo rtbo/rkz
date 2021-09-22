@@ -1,7 +1,7 @@
 use super::gas::PureGas;
 use roots::{self, Roots};
 
-const R: f64 = 6.3145;
+const R: f64 = 8.31446262;
 
 /// Redlich-Kwong A factor
 const RK_A: f64 = 0.42748023;
