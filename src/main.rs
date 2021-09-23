@@ -11,21 +11,38 @@ use gases::GASES;
 use rk::RkGas;
 
 fn main() {
-    let matches = App::new("Redlich-Kwong Z-factor calculator")
-        .version("0.1.0")
+    let matches = App::new("rkz")
+        .version("v0.1.0")
+        .bin_name("rkz")
         .author("Rémi Thebault <remi.thebault@gmail.com>")
-        .about(concat!(
-            "Computes compression (Z) factor of several gases in conditions of pressure and temperature. ",
-            "If a range is provided for pressure or temperature, the result is written in CSV format for ",
-            "each element of both range (1 row per pressure condition, 1 column per temperature condition).\n\n",
+        .long_about(concat!(
+            "\nComputes compression factor of several gases and mixtures in conditions of pressure and temperature ",
+            "using the Redlich-Kwong equation of state.\n\n",
+            "                                                  PV\n",
+            "The compression factor of a gas is defined as Z = ---.\n",
+            "                                                  nRT\n\n",
+            "A range can be provided instead of scalar values for pressure or temperature. In such case, ",
+            "the result is written in CSV format with one Z value per combination of pressure and temperature ",
+            "(1 row per pressure condition, 1 column per temperature condition).\n",
+            "Range are provided in the form of min:max[:step] (e.g. '20:800' or '20:800:10'). ",
+            "If step are assumed, it is assumed to be equal to one.\n\n",
             "Mixture for option --gas|-g can be specified in the form of molar_fraction%gas_id+[molar_fraction%gas_id]. ",
             "Mixture molar fractions can only be specified as percentage or be omitted. ",
             "Gases without molar fraction evenly take the rest of the mixture. Examples:\n",
             "  - '80%N2+20%O2' => 80% Nitrogen and 20% Oxygen\n",
             "  - '80%N2+O2' => 80% Nitrogen and 20% Oxygen\n",
             "  - '80%N2+O2+CO2' => 80% Nitrogen, 10% Oxygen and 10% Carbon dioxide\n",
+            "  - '78%N2+21%O2+Ar' => air composition (more or less)\n",
             "  - 'N2+O2' => 50% Nitrogen and 50% Oxygen\n",
         ))
+        .after_help(concat!(
+            "EXAMPLES:\n",
+            "    rkz --list-gas                     Print a list of all gases referenced in RKZ\n",
+            "    rkz -g N2 -p 200 -t 20             Z-factor of Nitrogen at 200bar and 20°C\n",
+            "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50 Z-factor of air at 200bar and 50°C\n",
+            "    rkz -g H2 -p 1:1000:10 -t -40:80   Z-factor of Hydrogen from 1 to 1000bar and -40 to +80°C\n",
+        )
+    )
         .arg(Arg::with_name("gas")
             .short("g")
             .long("gas")
