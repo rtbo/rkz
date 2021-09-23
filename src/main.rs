@@ -51,9 +51,9 @@ fn main() {
 
     if matches.is_present("list-gas") {
         println!("Gases referenced by RKZ:");
-        println!("    ID      Name");
+        println!("    ID        Name");
         for g in GASES.iter() {
-            let space = 8 - g.id.chars().count();
+            let space = 10 - g.id.chars().count();
             assert!(space > 0);
             let space = " ".repeat(space);
             println!("    {}{}{}", g.id, space, g.name);
