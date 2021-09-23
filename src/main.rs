@@ -15,6 +15,7 @@ fn main() {
         .version("v0.1.0")
         .bin_name("rkz")
         .author("Rémi Thebault <remi.thebault@gmail.com>")
+        .set_term_width(80)
         .long_about(concat!(
             "\nComputes compression factor of several gases and mixtures in conditions of pressure and temperature ",
             "using the Redlich-Kwong equation of state.\n\n",
@@ -25,7 +26,7 @@ fn main() {
             "the result is written in CSV format with one Z value per combination of pressure and temperature ",
             "(1 row per pressure condition, 1 column per temperature condition).\n",
             "Range are provided in the form of min:max[:step] (e.g. '20:800' or '20:800:10'). ",
-            "If step are assumed, it is assumed to be equal to one.\n\n",
+            "If step is omitted, it is assumed to be equal to one.\n\n",
             "Mixture for option --gas|-g can be specified in the form of molar_fraction%gas_id+[molar_fraction%gas_id]. ",
             "Mixture molar fractions can only be specified as percentage or be omitted. ",
             "Gases without molar fraction evenly take the rest of the mixture. Examples:\n",
