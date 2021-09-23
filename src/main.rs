@@ -4,7 +4,9 @@ use std::process;
 mod gas;
 mod gases;
 mod rk;
+mod util;
 
+use gas::Gas;
 use gases::GASES;
 use rk::RkGas;
 
@@ -15,12 +17,19 @@ fn main() {
         .about(concat!(
             "Computes compression (Z) factor of several gases in conditions of pressure and temperature. ",
             "If a range is provided for pressure or temperature, the result is written in CSV format for ",
-            "each element of both range (1 row per pressure condition, 1 column per temperature condition)"
+            "each element of both range (1 row per pressure condition, 1 column per temperature condition).\n\n",
+            "Mixture for option --gas|-g can be specified in the form of molar_fraction%gas_id+[molar_fraction%gas_id]. ",
+            "Mixture molar fractions can only be specified as percentage or be omitted. ",
+            "Gases without molar fraction evenly take the rest of the mixture. Examples:\n",
+            "  - '80%N2+20%O2' => 80% Nitrogen and 20% Oxygen\n",
+            "  - '80%N2+O2' => 80% Nitrogen and 20% Oxygen\n",
+            "  - '80%N2+O2+CO2' => 80% Nitrogen, 10% Oxygen and 10% Carbon dioxide\n",
+            "  - 'N2+O2' => 50% Nitrogen and 50% Oxygen\n",
         ))
         .arg(Arg::with_name("gas")
             .short("g")
             .long("gas")
-            .help("Specify the gas by id. (--list-gas to show referenced gases)")
+            .help("Specify the gas by id or by mixture spec (see above)")
             .takes_value(true))
         .arg(Arg::with_name("temperature")
             .short("t")
@@ -82,10 +91,7 @@ fn main() {
 }
 
 fn process_args(gas: &str, temperature: &str, pressure: &str) -> Result<(), String> {
-    let gas = GASES
-        .iter()
-        .find(|g| g.id == gas)
-        .ok_or("The requested gas is not referenced")?;
+    let gas = Gas::from_string(gas)?;
     let temperature = Range::parse(temperature)?;
     let pressure = Range::parse(pressure)?;
 
@@ -110,6 +116,7 @@ fn process_args(gas: &str, temperature: &str, pressure: &str) -> Result<(), Stri
                     print!("\t{}", gas.z(p, t));
                 }
             }
+            println!();
         }
     }
     Ok(())
@@ -126,7 +133,7 @@ impl Range {
         let v = {
             let mut v: Vec<f64> = Vec::new();
             for s in input.split(':') {
-                v.push(parse_num(s)?);
+                v.push(util::parse_num(s)?);
             }
             v
         };
@@ -200,10 +207,4 @@ impl Iterator for ScalarIt {
             None
         }
     }
-}
-
-fn parse_num(input: &str) -> Result<f64, String> {
-    input
-        .parse::<f64>()
-        .map_err(|_| format!("Can't parse {} as a number", input))
 }

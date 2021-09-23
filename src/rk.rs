@@ -1,4 +1,4 @@
-use super::gas::PureGas;
+use super::gas::{Gas, GasComp, GasMixture, PureGas};
 use roots::{self, Roots};
 
 const R: f64 = 8.31446262;
@@ -45,5 +45,42 @@ impl RkGas for PureGas {
     }
     fn b_const(&self) -> f64 {
         RK_B * R * self.tc / self.pc
+    }
+}
+
+impl RkGas for GasMixture {
+    fn a_const(&self) -> f64 {
+        let mut res = 0f64;
+        for i in self.comps.iter() {
+            let ai = i.pure_gas().a_const();
+            for j in self.comps.iter() {
+                let aj = j.pure_gas().a_const();
+                res += i.molar_fraction() * j.molar_fraction() * (ai * aj).sqrt();
+            }
+        }
+        res
+    }
+
+    fn b_const(&self) -> f64 {
+        let mut res = 0f64;
+        for i in self.comps.iter() {
+            res += i.molar_fraction() * i.pure_gas().b_const();
+        }
+        res
+    }
+}
+
+impl RkGas for Gas {
+    fn a_const(&self) -> f64 {
+        match self {
+            Gas::Pure(g) => g.a_const(),
+            Gas::Mixture(g) => g.a_const(),
+        }
+    }
+    fn b_const(&self) -> f64 {
+        match self {
+            Gas::Pure(g) => g.b_const(),
+            Gas::Mixture(g) => g.b_const(),
+        }
     }
 }
