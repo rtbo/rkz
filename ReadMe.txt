@@ -45,9 +45,11 @@ OPTIONS:
             of start:stop[:step].
 
 EXAMPLES:
-    rkz --list-gas                     Print a list of all gases referenced in
-RKZ
-    rkz -g N2 -p 200 -t 20             Z-factor of Nitrogen at 200bar and 20°C
-    rkz -g 78%N2+21%O2+Ar -p 200 -t 50 Z-factor of air at 200bar and 50°C
-    rkz -g H2 -p 1:1000:10 -t -40:80   Z-factor of Hydrogen from 1 to 1000bar
-and -40 to +80°C
+    rkz --list-gas
+            Print a list of all gases referenced in RKZ
+    rkz -g N2 -p 200 -t 20
+            Z-factor of Nitrogen at 200bar and 20°C
+    rkz -g 78%N2+21%O2+Ar -p 200 -t 50
+            Z-factor of air at 200bar and 50°C
+    rkz -g H2 -p 1:1000:10 -t -40:80
+            Z-factor CSV table of Hydrogen from 1 to 1000bar and -40 to +80°C

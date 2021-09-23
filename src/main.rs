@@ -38,10 +38,14 @@ fn main() {
         ))
         .after_help(concat!(
             "EXAMPLES:\n",
-            "    rkz --list-gas                     Print a list of all gases referenced in RKZ\n",
-            "    rkz -g N2 -p 200 -t 20             Z-factor of Nitrogen at 200bar and 20°C\n",
-            "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50 Z-factor of air at 200bar and 50°C\n",
-            "    rkz -g H2 -p 1:1000:10 -t -40:80   Z-factor of Hydrogen from 1 to 1000bar and -40 to +80°C\n",
+            "    rkz --list-gas\n",
+            "            Print a list of all gases referenced in RKZ\n",
+            "    rkz -g N2 -p 200 -t 20\n",
+            "            Z-factor of Nitrogen at 200bar and 20°C\n",
+            "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50\n",
+            "            Z-factor of air at 200bar and 50°C\n",
+            "    rkz -g H2 -p 1:1000:10 -t -40:80\n",
+            "            Z-factor CSV table of Hydrogen from 1 to 1000bar and -40 to +80°C\n",
         )
     )
         .arg(Arg::with_name("gas")
