@@ -1,4 +1,4 @@
-rkz v1.0.0
+rkz 1.0.1
 Rémi Thebault <remi.thebault@gmail.com>
 
 Computes compression factor of several gases and mixtures in conditions of
@@ -25,13 +25,25 @@ take the rest of the mixture. Examples:
   - '78%N2+21%O2+Ar' => air composition (more or less)
   - 'N2+O2' => 50% Nitrogen and 50% Oxygen
 
+DISCLAIMER: rkz is provided "as is" without any warranty. See the --license
+option for details.
+
 USAGE:
     rkz [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help        Prints help information
-        --list-gas    Print a list of referenced gases
-    -V, --version     Prints version information
+    -h, --help        
+            Prints help information
+
+        --license     
+            Prints the license text and exits
+
+        --list-gas    
+            Prints a list of referenced gases
+
+    -V, --version     
+            Prints version information
+
 
 OPTIONS:
     -g, --gas <gas>
