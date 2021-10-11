@@ -12,7 +12,7 @@ use rk::RkGas;
 
 fn main() {
     let matches = App::new("rkz")
-        .version("v1.0.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .bin_name("rkz")
         .author("Rémi Thebault <remi.thebault@gmail.com>")
         .set_term_width(80)
