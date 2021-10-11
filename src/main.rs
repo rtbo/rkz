@@ -34,7 +34,8 @@ fn main() {
             "  - '80%N2+O2' => 80% Nitrogen and 20% Oxygen\n",
             "  - '80%N2+O2+CO2' => 80% Nitrogen, 10% Oxygen and 10% Carbon dioxide\n",
             "  - '78%N2+21%O2+Ar' => air composition (more or less)\n",
-            "  - 'N2+O2' => 50% Nitrogen and 50% Oxygen\n",
+            "  - 'N2+O2' => 50% Nitrogen and 50% Oxygen\n\n",
+            "DISCLAIMER: rkz is provided \"as is\" without any warranty. See the --license option for details.\n",
         ))
         .after_help(concat!(
             "EXAMPLES:\n",
@@ -46,8 +47,7 @@ fn main() {
             "            Z-factor of air at 200bar and 50°C\n",
             "    rkz -g H2 -p 1:1000:10 -t -40:80\n",
             "            Z-factor CSV table of Hydrogen from 1 to 1000bar and -40 to +80°C\n",
-        )
-    )
+        ))
         .arg(Arg::with_name("gas")
             .short("g")
             .long("gas")
@@ -66,7 +66,11 @@ fn main() {
             .takes_value(true))
         .arg(Arg::with_name("list-gas")
             .long("list-gas")
-            .help("Print a list of referenced gases"))
+            .help("Prints a list of referenced gases"))
+        .arg(Arg::with_name("license")
+            .long("license")
+            .help("Prints the license text and exits")
+        )
         .get_matches();
 
     let mut done_something = false;
@@ -80,6 +84,12 @@ fn main() {
             let space = " ".repeat(space);
             println!("    {}{}{}", g.id, space, g.name);
         }
+        done_something = true;
+    }
+
+    if matches.is_present("license") {
+        let license = include_str!("../License.txt");
+        print!("{}", license);
         done_something = true;
     }
 
