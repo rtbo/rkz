@@ -45,8 +45,8 @@ fn main() {
             "            Z-factor of Nitrogen at 200bar and 20°C\n",
             "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50\n",
             "            Z-factor of air at 200bar and 50°C\n",
-            "    rkz -g H2 -p 1:1000:10 -t -40:80\n",
-            "            Z-factor CSV table of Hydrogen from 1 to 1000bar and -40 to +80°C\n",
+            "    rkz -g H2 -p 0:1000:10 -t -40:80 -r stdatm\n",
+            "            Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C\n",
         ))
         .arg(Arg::with_name("gas")
             .short("g")
@@ -62,7 +62,12 @@ fn main() {
         .arg(Arg::with_name("pressure")
             .short("p")
             .long("pressure")
-            .help("Specify the abs. pressure in bar. A range can be specified in the form of start:stop[:step].")
+            .help("Specify the pressure in bar. By default absolute unless --relative is used. A range can be specified in the form of start:stop[:step].")
+            .takes_value(true))
+        .arg(Arg::with_name("relative")
+            .short("r")
+            .long("relative")
+            .help("Specify that the pressure is relative to the pressure indicated in this parameter (in hPa). \"stdatm\" can be used for 1013.25.")
             .takes_value(true))
         .arg(Arg::with_name("list-gas")
             .long("list-gas")
@@ -96,11 +101,12 @@ fn main() {
     let gas = matches.value_of("gas");
     let temperature = matches.value_of("temperature");
     let pressure = matches.value_of("pressure");
+    let relative = matches.value_of("relative");
 
     match (gas, temperature, pressure) {
         (None, None, None) => {}
         (Some(gas), Some(temperature), Some(pressure)) => {
-            match process_args(gas, temperature, pressure) {
+            match process_args(gas, temperature, pressure, relative) {
                 Err(err) => {
                     eprintln!("{}", err);
                     process::exit(1);
@@ -122,10 +128,33 @@ fn main() {
     }
 }
 
-fn process_args(gas: &str, temperature: &str, pressure: &str) -> Result<(), String> {
+fn process_args(
+    gas: &str,
+    temperature: &str,
+    pressure: &str,
+    relative: Option<&str>,
+) -> Result<(), String> {
     let gas = Gas::from_string(gas)?;
     let temperature = Range::parse(temperature)?;
-    let pressure = Range::parse(pressure)?;
+    let mut pressure = Range::parse(pressure)?;
+    let relative = relative.map(|r| {
+        if r == "stdatm" {
+            Ok(1.01325)
+        } else {
+            util::parse_num(r).map(|r| r / 1000.0)
+        }
+    });
+    // convert from Option<Result<f64>> to Option<f64> (returning the Err if any).
+    let relative = match relative {
+        Some(Ok(rel)) => Some(rel),
+        Some(Err(err)) => return Err(err),
+        None => None,
+    };
+
+    if let Some(relative) = relative {
+        pressure.start += relative;
+        pressure.stop += relative;
+    }
 
     match (temperature.is_scalar(), pressure.is_scalar()) {
         (true, true) => {
@@ -142,7 +171,12 @@ fn process_args(gas: &str, temperature: &str, pressure: &str) -> Result<(), Stri
             }
             // rows
             for p in pressure.iter() {
-                print!("\n{}", p);
+                let phead = if let Some(relative) = relative {
+                    p - relative
+                } else {
+                    p
+                };
+                print!("\n{}", phead);
                 let p = p * 100000f64;
                 for t in temperature.iter().map(|t| t + 273.15f64) {
                     print!("\t{}", gas.z(p, t));

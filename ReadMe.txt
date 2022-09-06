@@ -32,26 +32,21 @@ USAGE:
     rkz [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help        
-            Prints help information
-
-        --license     
-            Prints the license text and exits
-
-        --list-gas    
-            Prints a list of referenced gases
-
-    -V, --version     
-            Prints version information
-
+    -h, --help        Prints help information
+        --license     Prints the license text and exits
+        --list-gas    Prints a list of referenced gases
+    -V, --version     Prints version information
 
 OPTIONS:
     -g, --gas <gas>
             Specify the gas by id or by mixture spec (see above)
 
     -p, --pressure <pressure>
-            Specify the abs. pressure in bar. A range can be specified in the
-            form of start:stop[:step].
+            Specify the pressure in bar. By default absolute unless --relative
+            is used. A range can be specified in the form of start:stop[:step].
+    -r, --relative <relative>
+            Specify that the pressure is relative to the pressure indicated in
+            this parameter (in hPa). "stdatm" can be used for 1013.25.
     -t, --temperature <temperature>
             Specify the temperature in °C. A range can be specified in the form
             of start:stop[:step].
@@ -63,5 +58,5 @@ EXAMPLES:
             Z-factor of Nitrogen at 200bar and 20°C
     rkz -g 78%N2+21%O2+Ar -p 200 -t 50
             Z-factor of air at 200bar and 50°C
-    rkz -g H2 -p 1:1000:10 -t -40:80
-            Z-factor CSV table of Hydrogen from 1 to 1000bar and -40 to +80°C
+    rkz -g H2 -p 0:1000:10 -t -40:80 -r stdatm
+            Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C
