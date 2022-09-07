@@ -1,4 +1,4 @@
-rkz 1.1.0
+rkz 1.2.0
 Rémi Thebault <remi.thebault@gmail.com>
 
 Computes compression factor of several gases and mixtures in conditions of
