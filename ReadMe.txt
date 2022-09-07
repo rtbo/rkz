@@ -1,12 +1,16 @@
-rkz 1.0.1
+rkz 1.1.0
 Rémi Thebault <remi.thebault@gmail.com>
 
 Computes compression factor of several gases and mixtures in conditions of
-pressure and temperature using the Redlich-Kwong equation of state.
+pressure and temperature using the either of the following equations of state:
+  - Van der Waals
+  - Redlich-Kwong (default)
+  - Soave-Redlich-Kwong
+  - Peng-Robinson
 
-                                                  PV
-The compression factor of a gas is defined as Z = ---.
-                                                  nRT
+                                                           PV
+The compression factor for a mole of gas is defined as Z = --.
+                                                           RT
 
 A range can be provided instead of scalar values for pressure or temperature. In
 such case, the result is written in CSV format with one Z value per combination
@@ -38,6 +42,10 @@ FLAGS:
     -V, --version     Prints version information
 
 OPTIONS:
+    -e, --eos <equation>
+            Specify the equation of state (case insensitive). Choices are VdW
+            for Van-der-Waals, RK for Redlich-Kwong, SRK for Soave-Redlich-Kwong
+            and PR for Peng-Robinson. [default: RK]
     -g, --gas <gas>
             Specify the gas by id or by mixture spec (see above)
 
@@ -53,10 +61,10 @@ OPTIONS:
 
 EXAMPLES:
     rkz --list-gas
-            Print a list of all gases referenced in RKZ
+        Print a list of all gases referenced in RKZ
     rkz -g N2 -p 200 -t 20
-            Z-factor of Nitrogen at 200bar and 20°C
-    rkz -g 78%N2+21%O2+Ar -p 200 -t 50
-            Z-factor of air at 200bar and 50°C
+        Z-factor of Nitrogen at 200bar and 20°C
+    rkz -g 78%N2+21%O2+Ar -p 200 -t 50 -e PR
+        Z-factor of air at 200bar and 50°C with Peng-Robinson equation of state
     rkz -g H2 -p 0:1000:10 -t -40:80 -r stdatm
-            Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C
+        Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C
