@@ -1,14 +1,14 @@
 use clap::{App, Arg};
 use std::process;
 
+mod eos;
 mod gas;
 mod gases;
-mod rk;
 mod util;
 
+use eos::{Eos, EosGas};
 use gas::Gas;
 use gases::GASES;
-use rk::RkGas;
 
 fn main() {
     let matches = App::new("rkz")
@@ -18,10 +18,15 @@ fn main() {
         .set_term_width(80)
         .long_about(concat!(
             "\nComputes compression factor of several gases and mixtures in conditions of pressure and temperature ",
-            "using the Redlich-Kwong equation of state.\n\n",
-            "                                                  PV\n",
-            "The compression factor of a gas is defined as Z = ---.\n",
-            "                                                  nRT\n\n",
+            "using the either of the following equations of state:\n",
+            "  - Van der Waals\n",
+            "  - Redlich-Kwong (default)\n",
+            "  - Soave-Redlich-Kwong\n",
+            "  - Peng-Robinson\n",
+            "\n",
+            "                                                           PV\n",
+            "The compression factor for a mole of gas is defined as Z = --.\n",
+            "                                                           RT\n\n",
             "A range can be provided instead of scalar values for pressure or temperature. In such case, ",
             "the result is written in CSV format with one Z value per combination of pressure and temperature ",
             "(1 row per pressure condition, 1 column per temperature condition).\n",
@@ -40,13 +45,13 @@ fn main() {
         .after_help(concat!(
             "EXAMPLES:\n",
             "    rkz --list-gas\n",
-            "            Print a list of all gases referenced in RKZ\n",
+            "        Print a list of all gases referenced in RKZ\n",
             "    rkz -g N2 -p 200 -t 20\n",
-            "            Z-factor of Nitrogen at 200bar and 20°C\n",
-            "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50\n",
-            "            Z-factor of air at 200bar and 50°C\n",
+            "        Z-factor of Nitrogen at 200bar and 20°C\n",
+            "    rkz -g 78%N2+21%O2+Ar -p 200 -t 50 -e PR\n",
+            "        Z-factor of air at 200bar and 50°C with Peng-Robinson equation of state\n",
             "    rkz -g H2 -p 0:1000:10 -t -40:80 -r stdatm\n",
-            "            Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C\n",
+            "        Z-factor CSV table of Hydrogen from 0 to 1000barG and -40 to +80°C\n",
         ))
         .arg(Arg::with_name("gas")
             .short("g")
@@ -64,6 +69,13 @@ fn main() {
             .long("pressure")
             .help("Specify the pressure in bar. By default absolute unless --relative is used. A range can be specified in the form of start:stop[:step].")
             .takes_value(true))
+        .arg(Arg::with_name("equation")
+            .short("e")
+            .long("eos")
+            .help("Specify the equation of state (case insensitive). Choices are VdW for Van-der-Waals, RK for Redlich-Kwong, SRK for Soave-Redlich-Kwong and PR for Peng-Robinson.")
+            .takes_value(true)
+            .default_value("RK")
+        )
         .arg(Arg::with_name("relative")
             .short("r")
             .long("relative")
@@ -102,11 +114,12 @@ fn main() {
     let temperature = matches.value_of("temperature");
     let pressure = matches.value_of("pressure");
     let relative = matches.value_of("relative");
+    let eos = matches.value_of("equation");
 
     match (gas, temperature, pressure) {
         (None, None, None) => {}
         (Some(gas), Some(temperature), Some(pressure)) => {
-            match process_args(gas, temperature, pressure, relative) {
+            match process_args(gas, temperature, pressure, relative, eos) {
                 Err(err) => {
                     eprintln!("{}", err);
                     process::exit(1);
@@ -133,6 +146,7 @@ fn process_args(
     temperature: &str,
     pressure: &str,
     relative: Option<&str>,
+    eos: Option<&str>,
 ) -> Result<(), String> {
     let gas = Gas::from_string(gas)?;
     let temperature = Range::parse(temperature)?;
@@ -151,6 +165,24 @@ fn process_args(
         None => None,
     };
 
+    let eos = match eos {
+        Some(eos) => {
+            let lw = eos.to_lowercase();
+            if lw == "vdw" {
+                Eos::VanDerWaals
+            } else if lw == "rk" {
+                Eos::RedlichKwong
+            } else if lw == "srk" {
+                Eos::SoaveRedlichKwong
+            } else if lw == "pr" {
+                Eos::PengRobinson
+            } else {
+                panic!("Unknown equation of state: {}", eos)
+            }
+        }
+        None => Eos::RedlichKwong,
+    };
+
     if let Some(relative) = relative {
         pressure.start += relative;
         pressure.stop += relative;
@@ -160,7 +192,7 @@ fn process_args(
         (true, true) => {
             let p_pa = pressure.start * 100000f64;
             let t_k = temperature.start + 273.15;
-            println!("{}", gas.z(p_pa, t_k));
+            println!("{}", gas.z(eos, p_pa, t_k));
         }
         (_, _) => {
             // writing CSV
@@ -179,7 +211,7 @@ fn process_args(
                 print!("\n{}", phead);
                 let p = p * 100000f64;
                 for t in temperature.iter().map(|t| t + 273.15f64) {
-                    print!("\t{}", gas.z(p, t));
+                    print!("\t{}", gas.z(eos, p, t));
                 }
             }
             println!();

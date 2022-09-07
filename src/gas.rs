@@ -17,6 +17,8 @@ pub struct PureGas {
     pub tc: f64,
     /// Critical pressure in Pa
     pub pc: f64,
+    /// Acentric factor
+    pub w: f64,
 }
 
 #[derive(Clone, Debug)]
